@@ -6,7 +6,6 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Addons.Preconditions;
 using Discord.Commands;
 using Discord.Net;
 using Discord.WebSocket;
@@ -28,9 +27,12 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("addemoji", RunMode = RunMode.Async)]
         [Summary("Add an emoji to your server from DiscordEmoji.")]
-        [Ratelimit(20, 1, Measure.Minutes)]
+        [Cooldown(3)]
         [RequireBotPermission(GuildPermission.ManageEmojis)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [RequireBotPermission(ChannelPermission.AddReactions)]
         [RequireUserPermission(GuildPermission.ManageEmojis)]
+        [RequireBotPermission(GuildPermission.EmbedLinks)]
         [RequireContext(ContextType.Guild)]
         [RequireNoOpenChoice]
         public async Task AddEmoji(string name, string nameOverride = null)
@@ -172,8 +174,10 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("removeemoji", RunMode = RunMode.Async)]
         [Summary("Remove an emoji from your server.")]
-        [Ratelimit(20, 1, Measure.Minutes)]
+        [Cooldown(3)]
         [RequireBotPermission(GuildPermission.ManageEmojis)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [RequireBotPermission(ChannelPermission.AddReactions)]
         [RequireUserPermission(GuildPermission.ManageEmojis)]
         [RequireContext(ContextType.Guild)]
         [RequireNoOpenChoice]
@@ -245,7 +249,8 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("viewemoji")]
         [Summary("View an emoji from DiscordEmoji.")]
-        [Ratelimit(35, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task ViewEmoji(string name)
         {
             var emoji = DiscordEmoji.EmoteFromName(name);
@@ -265,21 +270,35 @@ namespace EmojiButlerRewrite.Modules
                 return;
             }
 
+            string source;
+
+            if (String.IsNullOrWhiteSpace(emoji.Source))
+                source = "None";
+            else if (emoji.Source.StartsWith("http://") || emoji.Source.StartsWith("https://"))
+                source = $"[{emoji.Source}]({emoji.Source})";
+            else
+                source = emoji.Source;
+
             await ReplyAsync(embed: new EmbedBuilder
+            {
+                Title = $":{emoji.Title}:",
+                Url = $"https://discordemoji.com/emoji/{emoji.Slug}",
+                Description = String.Join('\n', new string[]
                 {
-                    Title = $":{emoji.Title}:",
-                    Url = $"https://discordemoji.com/emoji/{emoji.Slug}",
-                    Description = $"Author: **{emoji.Author}**\nCategory: **{DiscordEmoji.GetCategoryName(emoji.Category)}**\nFavorites: **{emoji.Favorites}**\n\nDescription:\n*{WebUtility.HtmlDecode(emoji.Description).Trim()}*",
-                    ImageUrl = emoji.Image
-                }
-                .WithFooter("https://discordemoji.com", "https://discordemoji.com/assets/img/ogicon.png")
-                .Build()
-            );
+                    $"Author: **{emoji.Author}**",
+                    $"Category: **{DiscordEmoji.GetCategoryName(emoji.Category)}**",
+                    $"Favorites: **{emoji.Favorites}**",
+                    $"Source: {source}",
+                    $"\nDescription:\n*{WebUtility.HtmlDecode(emoji.Description).Trim()}*"
+                }),
+                ImageUrl = emoji.Image
+            }.WithFooter("https://discordemoji.com", "https://discordemoji.com/assets/img/ogicon.png").Build());
         }
 
         [Command("searchemoji")]
         [Summary("Search for an emoji from DiscordEmoji.")]
-        [Ratelimit(35, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task SearchEmoji(string name)
         {
             var emojis = DiscordEmoji.Emoji.Where(x => x.Title.IndexOf(name, StringComparison.OrdinalIgnoreCase) != -1);
@@ -306,7 +325,8 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("listemoji")]
         [Summary("List emojis from DiscordEmoji.")]
-        [Ratelimit(35, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task ListEmoji(string category, int page = 1)
         {
             if (page < 1)
@@ -367,7 +387,8 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("categories")]
         [Summary("Display all DiscordEmoji emoji categories.")]
-        [Ratelimit(40, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task Categories() =>
             await ReplyAsync(embed: new EmbedBuilder
             {
@@ -377,7 +398,8 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("discordemoji")]
         [Summary("Displays DiscordEmoji statistics.")]
-        [Ratelimit(40, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task _DiscordEmoji()
         {
             var s = DiscordEmoji.Statistics;

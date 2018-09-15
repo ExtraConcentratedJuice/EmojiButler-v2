@@ -8,7 +8,7 @@ using EmojiButlerRewrite.Services;
 using Discord.WebSocket;
 using System.Linq;
 using EmojiButlerRewrite.Entities;
-using Discord.Addons.Preconditions;
+using EmojiButlerRewrite.Preconditions;
 
 namespace EmojiButlerRewrite.Modules
 {
@@ -21,7 +21,8 @@ namespace EmojiButlerRewrite.Modules
 
         [Command("reportissue")]
         [Summary("Report an issue to the bot developer.")]
-        [Ratelimit(1, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.AddReactions)]
+        [Cooldown(15)]
         public async Task ReportIssue([Remainder] string issue)
         {
             var embed = new EmbedBuilder
@@ -31,13 +32,12 @@ namespace EmojiButlerRewrite.Modules
             }.WithAuthor(Context.User.Username, null, Context.User.GetAvatarUrl());
 
             await (Client.GetChannel(415685517271891980) as ITextChannel).SendMessageAsync(embed: embed.Build());
-
-            await Context.Message.AddReactionAsync(new Emoji("👌"));
         }
 
         [Command("help")]
         [Summary("Displays the bot's help page.")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.AddReactions)]
+        [Cooldown(5)]
         public async Task Help()
         {
             string desc = $"The official EmojiButler manual. EmojiButler is a bot that grabs emoji for you from [DiscordEmoji](https://discordemoji.com). All commands involving the management of emojis require the user and bot to have the 'Manage Emojis' permission.\n\nTo get help on a particular command, do ``{Configuration.Prefix}help <commandName>``.";
@@ -59,22 +59,23 @@ namespace EmojiButlerRewrite.Modules
             embed.AddField("\u200B", "**Other Stuff**\nThis bot is primarily an interface to add emojis to your server from [DiscordEmoji](https://discordemoji.com), you should check it out before using the bot." +
                 "\n\n*The bot's logo is a modified version of the Jenkins (https://jenkins.io/) logo, and I am required by the license to link back to it.*");
 
-            await ReplyAsync(embed: embed.Build());
+            await Context.User.SendMessageAsync(embed: embed.Build());
 
-            if (Context.Guild != null)
+            if (!(Context.Channel is IDMChannel))
                 await Context.Message.AddReactionAsync(new Emoji("👌"));
         }
 
         [Command("hi"), Summary("If I'm alive, I'll wave. :wave:")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [Cooldown(3)]
         public async Task Hi() => await ReplyAsync(":wave:");
 
         [Command("source"), Summary("Gives you my sauce :spaghetti:")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [Cooldown(3)]
         public async Task Source() => await ReplyAsync("https://github.com/ExtraConcentratedJuice/EmojiButler");
 
         [Command("info"), Summary("Gives you some information about myself. :page_facing_up:")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [RequireBotPermission(ChannelPermission.EmbedLinks)]
+        [Cooldown(3)]
         public async Task Info() =>
             await ReplyAsync(embed: new EmbedBuilder
             {
@@ -88,11 +89,11 @@ namespace EmojiButlerRewrite.Modules
             .Build());
 
         [Command("server"), Summary("Displays an invite to the EmojiButler server.")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [Cooldown(3)]
         public async Task Server() => await ReplyAsync("https://discord.gg/Ushqydb");
 
         [Command("invite"),Summary("Displays a link to invite me to your server.")]
-        [Ratelimit(10, 1, Measure.Minutes)]
+        [Cooldown(3)]
         public async Task Invite() => await ReplyAsync("https://discordapp.com/oauth2/authorize?client_id=415637632660537355&scope=bot&permissions=1073794112");
     }
 }

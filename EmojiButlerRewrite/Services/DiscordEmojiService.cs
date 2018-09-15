@@ -1,11 +1,14 @@
 ﻿using EmojiButlerRewrite.Entities;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -17,9 +20,13 @@ namespace EmojiButlerRewrite.Services
         private readonly HttpClient client;
         private readonly Timer timer;
 
-        public List<DiscordEmojiEmote> Emoji { get; private set; }
+        private List<DiscordEmojiEmote> emoji;
+        private Dictionary<int, string> categories;
+
+        public ReadOnlyCollection<DiscordEmojiEmote> Emoji { get => new ReadOnlyCollection<DiscordEmojiEmote>(emoji); }
+        public ReadOnlyDictionary<int, string> Categories { get => new ReadOnlyDictionary<int, string>(categories); }
+
         public DiscordEmojiStatistics Statistics { get; private set; }
-        public Dictionary<int, string> Categories { get; private set; }
 
         public DiscordEmojiService()
         {
@@ -56,6 +63,7 @@ namespace EmojiButlerRewrite.Services
             var queryString = new FormUrlEncodedContent(query).ReadAsStringAsync().Result;
 
             var resp = await client.GetStringAsync("?" + queryString);
+
             return JsonConvert.DeserializeObject<T>(resp);
         }
 
@@ -66,8 +74,8 @@ namespace EmojiButlerRewrite.Services
         private async void RefreshEmoji()
         {
             Statistics = await GetStatisticsAsync();
-            Emoji = await GetEmojisAsync();
-            Categories = await GetCategoriesAsync();
+            emoji = await GetEmojisAsync();
+            categories = await GetCategoriesAsync();
         }
 
         public void Start()

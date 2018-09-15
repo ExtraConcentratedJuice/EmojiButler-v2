@@ -5,8 +5,15 @@
     <TargetFramework>netcoreapp2.0</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <LangVersion>7.1</LangVersion>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Discord.Addons.Preconditions" Version="1.2.0-alpha2" />
     <PackageReference Include="Discord.Net" Version="2.0.0-beta2-00989" />
     <PackageReference Include="Discord.Net.Providers.WS4Net" Version="2.0.0-beta2-00989" />
   </ItemGroup>

@@ -16,21 +16,31 @@ namespace EmojiButlerRewrite.Services
         private readonly CommandService commands;
         private readonly IServiceProvider serviceProvider;
         private readonly EmojiButlerConfiguration configuration;
+        private readonly CooldownTrackerService cooldowns;
+        private readonly Dictionary<ulong, DateTime> responseCooldowns = new Dictionary<ulong, DateTime>();
 
-        public CommandHandlerService(DiscordSocketClient client, CommandService commands, EmojiButlerConfiguration configuration, IServiceProvider serviceProvider)
+        public CommandHandlerService(DiscordSocketClient client, CommandService commands, EmojiButlerConfiguration configuration, CooldownTrackerService cooldowns, IServiceProvider serviceProvider)
         {
             this.client = client;
             this.commands = commands;
             this.configuration = configuration;
             this.serviceProvider = serviceProvider;
+            this.cooldowns = cooldowns;
         }
 
         public async Task InitializeAsync()
         {
             await commands.AddModulesAsync(Assembly.GetExecutingAssembly(), serviceProvider);
             commands.Log += async (LogMessage x) => Console.WriteLine($"[{x.Severity}] {x.Message}");
+            commands.CommandExecuted += OnCommandAsync;
             client.MessageReceived += OnMessageAsync;
         } 
+
+        private async Task OnCommandAsync(CommandInfo info, ICommandContext context, IResult result)
+        {
+            if (result.IsSuccess)
+                cooldowns.AddCooldown(info.Name, context.User.Id);
+        }
 
         private async Task OnMessageAsync(SocketMessage msg)
         {
@@ -47,7 +57,17 @@ namespace EmojiButlerRewrite.Services
             var result = await commands.ExecuteAsync(context, pos, serviceProvider);
 
             if (result.Error.HasValue && result.Error.Value != CommandError.UnknownCommand)
-                await context.Channel.SendMessageAsync(result.ToString());
+            {
+                if (responseCooldowns.TryGetValue(context.User.Id, out var time))
+                {
+                    if ((DateTime.Now - time).Seconds < 3)
+                        return;
+                }
+
+                await context.Channel.SendMessageAsync(result.ErrorReason);
+
+                responseCooldowns[context.User.Id] = DateTime.Now; 
+            }
         }
     }
 }

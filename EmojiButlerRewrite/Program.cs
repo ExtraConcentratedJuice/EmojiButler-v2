@@ -24,6 +24,7 @@ namespace EmojiButlerRewrite
                 WebSocketProvider = Discord.Net.Providers.WS4Net.WS4NetProvider.Instance
             }))
             .AddSingleton<ChoiceTrackerService>()
+            .AddSingleton<CooldownTrackerService>()
             .AddSingleton<ReactionCollectorService>()
             .AddSingleton<CommandService>()
             .AddSingleton<CommandHandlerService>()

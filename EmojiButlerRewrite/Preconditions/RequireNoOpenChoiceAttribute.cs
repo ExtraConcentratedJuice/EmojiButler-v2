@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace EmojiButlerRewrite.Preconditions
 {
-    public class RequireNoOpenChoice : PreconditionAttribute
+    public class RequireNoOpenChoiceAttribute : PreconditionAttribute
     {
         public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
         {
