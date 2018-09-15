@@ -11,8 +11,6 @@ namespace EmojiButlerRewrite.Services
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<ulong, DateTime>> cooldowns = 
             new ConcurrentDictionary<string, ConcurrentDictionary<ulong, DateTime>>();
 
-        private readonly ConcurrentDictionary<ulong, DateTime> responseCooldowns;
-
         public void AddCooldown(string command, ulong user)
         {
             if (!cooldowns.ContainsKey(command))

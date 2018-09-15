@@ -20,8 +20,12 @@ namespace EmojiButlerRewrite
             .AddSingleton<DiscordEmojiService>()
             .AddSingleton(new DiscordSocketClient(new DiscordSocketConfig
             {
+#if DEBUG
                 LogLevel = LogSeverity.Debug,
                 WebSocketProvider = Discord.Net.Providers.WS4Net.WS4NetProvider.Instance
+#else
+                LogLevel = LogSeverity.Info
+#endif
             }))
             .AddSingleton<ChoiceTrackerService>()
             .AddSingleton<CooldownTrackerService>()

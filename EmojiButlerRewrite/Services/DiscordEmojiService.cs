@@ -25,7 +25,6 @@ namespace EmojiButlerRewrite.Services
 
         public ReadOnlyCollection<DiscordEmojiEmote> Emoji { get => new ReadOnlyCollection<DiscordEmojiEmote>(emoji); }
         public ReadOnlyDictionary<int, string> Categories { get => new ReadOnlyDictionary<int, string>(categories); }
-
         public DiscordEmojiStatistics Statistics { get; private set; }
 
         public DiscordEmojiService()

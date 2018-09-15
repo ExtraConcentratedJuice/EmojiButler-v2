@@ -9,6 +9,7 @@ using Discord.WebSocket;
 using System.Linq;
 using EmojiButlerRewrite.Entities;
 using EmojiButlerRewrite.Preconditions;
+using System.Diagnostics;
 
 namespace EmojiButlerRewrite.Modules
 {
@@ -75,7 +76,9 @@ namespace EmojiButlerRewrite.Modules
         [Command("info"), Summary("Gives you some information about myself. :page_facing_up:")]
         [RequireBotPermission(ChannelPermission.EmbedLinks)]
         [Cooldown(3)]
-        public async Task Info() =>
+        public async Task Info()
+        {
+            var proc = Process.GetCurrentProcess();
             await ReplyAsync(embed: new EmbedBuilder
             {
                 Title = "Information",
@@ -85,7 +88,10 @@ namespace EmojiButlerRewrite.Modules
             .AddField("Library", "discord.net v2.0.0")
             .AddField("Creator", "ExtraConcentratedJuice")
             .AddField("Server Count", Client.Guilds.Count())
+            .AddField("Allocated Memory", Math.Round(proc.WorkingSet64 / 1024F / 1024F, 2) + " MB")
             .Build());
+        }
+
 
         [Command("server"), Summary("Displays an invite to the EmojiButler server.")]
         [Cooldown(3)]
