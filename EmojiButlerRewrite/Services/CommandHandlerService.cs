@@ -64,7 +64,23 @@ namespace EmojiButlerRewrite.Services
                         return;
                 }
 
-                await context.Channel.SendMessageAsync(result.ErrorReason);
+                if (result.Error.Value == CommandError.BadArgCount)
+                {
+                    await context.Channel.SendMessageAsync($"Invalid command usage. Check out ``{configuration.Prefix}help`` for info on how to use it.");
+                }
+                else if (result.Error.Value == CommandError.Exception)
+                {
+                    await context.Channel.SendMessageAsync($"Crap, something went wrong. You'd do me a favor by reporting this with ``{configuration.Prefix}reportissue <details>``.");
+                }
+                else if (result.Error.Value == CommandError.UnmetPrecondition)
+                {
+                    await context.Channel.SendMessageAsync($"You do not meet a precondition for this command: {result.ErrorReason}");
+                }
+                else
+                {
+                    await context.Channel.SendMessageAsync("Failed to execute: " + result.ErrorReason);
+                }
+
 
                 responseCooldowns[context.User.Id] = DateTime.Now; 
             }

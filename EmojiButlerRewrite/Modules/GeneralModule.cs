@@ -14,7 +14,6 @@ namespace EmojiButlerRewrite.Modules
 {
     public class GeneralModule : ModuleBase
     {
-        public DiscordEmojiService DiscordEmoji { get; set; }
         public DiscordSocketClient Client { get; set; }
         public CommandService Commands { get; set; }
         public EmojiButlerConfiguration Configuration { get; set; }

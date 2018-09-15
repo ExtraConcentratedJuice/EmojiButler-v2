@@ -273,11 +273,11 @@ namespace EmojiButlerRewrite.Modules
             string source;
 
             if (String.IsNullOrWhiteSpace(emoji.Source))
-                source = "None";
+                source = "**None**";
             else if (emoji.Source.StartsWith("http://") || emoji.Source.StartsWith("https://"))
                 source = $"[{emoji.Source}]({emoji.Source})";
             else
-                source = emoji.Source;
+                source = $"**{emoji.Source}**";
 
             await ReplyAsync(embed: new EmbedBuilder
             {
