@@ -7,12 +7,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace EmojiButlerRewrite
 {
     class Program
     {
-        static void Main(string[] args) => new EmojiButler(CreateServices()).RunAsync().GetAwaiter().GetResult();
+        static async Task Main() => await ActivatorUtilities.CreateInstance<EmojiButler>(CreateServices()).RunAsync();
 
         private static IServiceProvider CreateServices() =>
             new ServiceCollection()

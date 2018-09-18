@@ -32,6 +32,8 @@ namespace EmojiButlerRewrite.Modules
             }.WithAuthor(Context.User.Username, null, Context.User.GetAvatarUrl());
 
             await (Client.GetChannel(415685517271891980) as ITextChannel).SendMessageAsync(embed: embed.Build());
+
+            await Context.Message.AddReactionAsync(new Emoji("👌"));
         }
 
         [Command("help")]

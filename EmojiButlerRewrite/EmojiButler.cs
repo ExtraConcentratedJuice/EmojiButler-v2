@@ -17,17 +17,18 @@ namespace EmojiButlerRewrite
         private readonly DiscordEmojiService discordEmoji;
         private readonly EmojiButlerConfiguration configuration;
 
-        public EmojiButler(IServiceProvider services)
+        public EmojiButler(DiscordSocketClient client, CommandHandlerService commandHandler, DiscordEmojiService discordEmoji, EmojiButlerConfiguration configuration)
         {
-            this.client = services.GetRequiredService<DiscordSocketClient>();
-            this.discordEmoji = services.GetRequiredService<DiscordEmojiService>();
-            this.commandHandler = services.GetRequiredService<CommandHandlerService>();
-            this.configuration = services.GetRequiredService<EmojiButlerConfiguration>();
+            this.client = client;
+            this.discordEmoji = discordEmoji;
+            this.commandHandler = commandHandler;
+            this.configuration = configuration;
         }
 
         public async Task RunAsync()
         {
             client.Log += async (LogMessage x) => Console.WriteLine($"[{x.Severity}] {x.Message}");
+            client.Ready += async () => await client.SetGameAsync("e:help | https://discordemoji.com", "https://twitch.tv/courierfive", ActivityType.Streaming);
 
             discordEmoji.Start();
             await commandHandler.InitializeAsync();
