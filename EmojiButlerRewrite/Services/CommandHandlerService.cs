@@ -31,15 +31,15 @@ namespace EmojiButlerRewrite.Services
         public async Task InitializeAsync()
         {
             await commands.AddModulesAsync(Assembly.GetExecutingAssembly(), serviceProvider);
-            commands.Log += async (LogMessage x) => Console.WriteLine($"[{x.Severity}] {x.Message}");
+            commands.Log += async (LogMessage x) => Console.WriteLine($"[{x.Severity}] {x.Message} {x.Exception?.ToString() ?? ""}");
             commands.CommandExecuted += OnCommandAsync;
             client.MessageReceived += OnMessageAsync;
         } 
 
-        private async Task OnCommandAsync(CommandInfo info, ICommandContext context, IResult result)
+        private async Task OnCommandAsync(Optional<CommandInfo> info, ICommandContext context, IResult result)
         {
-            if (result.IsSuccess)
-                cooldowns.AddCooldown(info.Name, context.User.Id);
+            if (info.IsSpecified && result.IsSuccess)
+                cooldowns.AddCooldown(info.Value.Name, context.User.Id);
         }
 
         private async Task OnMessageAsync(SocketMessage msg)

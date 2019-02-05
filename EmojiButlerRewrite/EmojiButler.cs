@@ -30,7 +30,7 @@ namespace EmojiButlerRewrite
             client.Log += async (LogMessage x) => Console.WriteLine($"[{x.Severity}] {x.Message}");
             client.Ready += async () => await client.SetGameAsync("e:help | https://discordemoji.com", "https://twitch.tv/courierfive", ActivityType.Streaming);
 
-            discordEmoji.Start();
+            await discordEmoji.Start();
             await commandHandler.InitializeAsync();
 
             await client.LoginAsync(TokenType.Bot, configuration.Token);

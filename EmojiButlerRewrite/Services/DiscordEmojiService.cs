@@ -1,24 +1,20 @@
 ﻿using EmojiButlerRewrite.Entities;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace EmojiButlerRewrite.Services
 {
     public class DiscordEmojiService
     {
         private readonly HttpClient client;
-        private readonly Timer timer;
+        private CancellationTokenSource cancellation;
 
         private List<DiscordEmojiEmote> emoji;
         private Dictionary<int, string> categories;
@@ -33,8 +29,6 @@ namespace EmojiButlerRewrite.Services
             {
                 BaseAddress = new Uri("https://discordemoji.com/api")
             };
-
-            this.timer = new Timer(TimeSpan.FromMinutes(5).TotalMilliseconds);
         }
 
         private async Task<List<DiscordEmojiEmote>> GetEmojisAsync() => await HttpGetAsync<List<DiscordEmojiEmote>>(null).ConfigureAwait(false);
@@ -68,20 +62,33 @@ namespace EmojiButlerRewrite.Services
 
         private async Task<T> HttpGetAsync<T>(string requestType) => await HttpGetAsync<T>(requestType, null);
 
-        private void OnTimerElapsed(object sender, ElapsedEventArgs e) => RefreshEmoji();
+        private async Task RefreshEmojiRoutine()
+        {
+            while (true)
+            {
+                try
+                {
+                    await RefreshEmoji();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Failed to fetch emojis: " + e);
+                }
+                await Task.Delay(TimeSpan.FromMinutes(5));
+            }
+        }
         
-        private async void RefreshEmoji()
+        private async Task RefreshEmoji()
         {
             Statistics = await GetStatisticsAsync();
             emoji = await GetEmojisAsync();
             categories = await GetCategoriesAsync();
         }
 
-        public void Start()
+        public async Task Start()
         {
-            RefreshEmoji();
-            timer.Elapsed += OnTimerElapsed;
-            timer.Start();
+            cancellation = new CancellationTokenSource();
+            var t = Task.Run(RefreshEmojiRoutine, cancellation.Token);
         }
     }
 }

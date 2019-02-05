@@ -45,7 +45,7 @@ namespace EmojiButlerRewrite.Modules
             string desc = $"The official EmojiButler manual. EmojiButler is a bot that grabs emoji for you from [DiscordEmoji](https://discordemoji.com). All commands involving the management of emojis require the user and bot to have the 'Manage Emojis' permission.\n\nTo get help on a particular command, do ``{Configuration.Prefix}help <commandName>``.";
 
             if (!String.IsNullOrWhiteSpace(Configuration.DblAuth))
-                desc += $"\n\nIf you like my bot, vote for it on [DBL](https://discordbots.org/bot/{Configuration.BotId})!";
+                desc += $"\n\nIf you like my bot, vote for it on [DBL](https://discordbots.org/bot/{Context.Client.CurrentUser.Id})!";
 
             EmbedBuilder embed = new EmbedBuilder
             {
@@ -61,7 +61,13 @@ namespace EmojiButlerRewrite.Modules
             embed.AddField("\u200B", "**Other Stuff**\nThis bot is primarily an interface to add emojis to your server from [DiscordEmoji](https://discordemoji.com), you should check it out before using the bot." +
                 "\n\n*The bot's logo is a modified version of the Jenkins (https://jenkins.io/) logo, and I am required by the license to link back to it.*");
 
-            await Context.User.SendMessageAsync(embed: embed.Build());
+            try
+            {
+                await Context.User.SendMessageAsync(embed: embed.Build());
+            } catch
+            {
+                await ReplyAsync("enable your DMs fool");
+            }
 
             if (!(Context.Channel is IDMChannel))
                 await Context.Message.AddReactionAsync(new Emoji("👌"));

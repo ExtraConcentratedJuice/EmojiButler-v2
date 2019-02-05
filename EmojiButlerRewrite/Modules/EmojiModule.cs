@@ -50,7 +50,7 @@ namespace EmojiButlerRewrite.Modules
                 return;
             }
 
-            if ((Context.Channel as ITextChannel).IsNsfw && DiscordEmoji.GetCategoryName(emoji.Category) == "NSFW")
+            if (!(Context.Channel as ITextChannel).IsNsfw && DiscordEmoji.GetCategoryName(emoji.Category) == "NSFW")
             {
                 await ReplyAsync("That's an NSFW emoji, go into an NSFW channel for that.");
                 return;
@@ -73,7 +73,7 @@ namespace EmojiButlerRewrite.Modules
             EmbedBuilder embed = new EmbedBuilder
             {
                 Title = "Confirmation",
-                Description = "Are you sure that you want to add this emoji to your server?\nReact in less than 20 seconds to confirm.",
+                Description = "Are you sure that you want to add this emoji to your server?\nReact with ✅ in less than 20 seconds to confirm. React with ❌ to abort.",
                 ThumbnailUrl = emoji.Image
             };
 
@@ -84,7 +84,6 @@ namespace EmojiButlerRewrite.Modules
 
             embed.AddField("Author", emoji.Author);
 
-
             SocketReaction reaction;
 
             try
@@ -93,8 +92,7 @@ namespace EmojiButlerRewrite.Modules
 
                 ChoiceTracker.AddUser(Context.User.Id);
 
-                await sent.AddReactionAsync(reactionYes);
-                await sent.AddReactionAsync(reactionNo);
+                var t = Task.Run(async () => await sent.AddReactionsAsync(new[] { reactionYes, reactionNo }));
 
                 reaction = await ReactionCollector.GrabReaction(Context.User, sent,
                     x => x.Emote.Equals(reactionYes) || x.Emote.Equals(reactionNo), 20);
@@ -196,7 +194,7 @@ namespace EmojiButlerRewrite.Modules
             EmbedBuilder embed = new EmbedBuilder
             {
                 Title = "Confirmation",
-                Description = "Are you sure that you want to remove this emoji?\nReact in less than 20 seconds to confirm.",
+                Description = "Are you sure that you want to remove this emoji?\nReact with ✅ in less than 20 seconds to confirm. React with ❌ to abort.",
                 ThumbnailUrl = toRemove.Url
             };
 
@@ -210,8 +208,7 @@ namespace EmojiButlerRewrite.Modules
 
                 ChoiceTracker.AddUser(Context.User.Id);
 
-                await sent.AddReactionAsync(reactionYes);
-                await sent.AddReactionAsync(reactionNo);
+                var t = Task.Run(async () => await sent.AddReactionsAsync(new[] { reactionYes, reactionNo }));
 
                 reaction = await ReactionCollector.GrabReaction(Context.User, sent,
                     x => x.Emote.Equals(reactionYes) || x.Emote.Equals(reactionNo), 20);
@@ -264,7 +261,7 @@ namespace EmojiButlerRewrite.Modules
                 return;
             }
 
-            if (!(Context.Channel is IDMChannel) && (Context.Channel as ITextChannel).IsNsfw && DiscordEmoji.GetCategoryName(emoji.Category) == "NSFW")
+            if (!(Context.Channel is IDMChannel) && !(Context.Channel as ITextChannel).IsNsfw && DiscordEmoji.GetCategoryName(emoji.Category) == "NSFW")
             {
                 await ReplyAsync("Woah, that's an NSFW emoji. Use this command in an NSFW channel.");
                 return;
